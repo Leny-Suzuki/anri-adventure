@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover, user-scalable=no">
 <meta name="theme-color" content="#f8e9f0">
-<title>アンリちゃんの大冒険 Ver.1.7</title>
+<title>アンリちゃんの大冒険 Ver.1.8</title>
 <style>
 :root{--pink:#e777a3;--plum:#77506d;--cream:#fffbf5;--outline:#e9b7c9}
 *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#f7eaf0;font-family:ui-rounded,"Hiragino Maru Gothic ProN","Hiragino Kaku Gothic ProN",Meiryo,sans-serif;color:#76516c;-webkit-tap-highlight-color:transparent}
@@ -423,6 +423,12 @@ function tick(){state.frame++;state.elapsed++;if(state.invincible>0)state.invinc
     if(overGap){fallIntoPit();return;}
     p.feet=FLOOR;p.vy=0;p.jumps=0;
   }
+  // Final stage: trigger the reunion as soon as Anri reaches Reni,
+  // rather than waiting until the end of the scrolling map (which let her run past him).
+  if(state.stage===STAGES.length-1){
+    const reniX=STAGES[state.stage].length-state.scroll+160;
+    if(reniX<=X+117+12){finish();return;}
+  }
   const px=X+33,py=p.feet-110,pw=55,ph=98;
   // Collect bright coins when Anri's body touches them; even failed runs keep earned coins.
   for(const c of state.coinsWorld){
@@ -466,7 +472,7 @@ function paintEnd(){// A deliberately separate cutscene: characters approach, th
  bg();const t=state.winTime;
  for(let i=0;i<22;i++){let x=(i*81+state.frame*1.4)%1050,y=(i*39+60)%365;label(i%4?'✦':'♥',x,y,12+i%4*4,i%2?'#fff6d9':'#f6a3c7','#c881b130');}
  if(t<113){let a=Math.min(1,t/105),ease=a*a*(3-2*a);const bob=t<100?Math.sin(t*.32)*2.5:0;girl(FLOOR+bob,118+ease*246,state.outfit);reniFacingAnri(760-ease*279,FLOOR-RENI_H+bob,RENI_W,RENI_H);label(a>.82?'もうすぐ…♡':'れにーが待ってる！',480,144,29,'#d75b91','#fff7f5');}
- else{let a=Math.min(1,(t-113)/20);const size=270+58*a;img('hug',480-size*.5,145-a*27,size,size);label('やったね！',480,106,38,'#d45b8d','#fff9f1');if(t>174)label(state.stage===STAGES.length-1?'GAME CLEAR!':`STAGE ${state.stage+1} CLEAR!`,480,52,32,'#c95b83','#fffbf5');}
+ else{let a=Math.min(1,(t-113)/20);const size=270+58*a;img('hug',480-size*.5,145-a*27,size,size);label('やったね！',480,106,38,'#d45b8d','#fff9f1');if(t>174)label(state.stage===STAGES.length-1?'GAME CLEAR!':`STAGE ${state.stage+1} CLEAR!`,480,52,32,'#c95b83','#fffbf5');if(t>174&&state.stage===STAGES.length-1)label('いつも可愛らしくいてくれてありがとう',480,490,25,'#c95b83','#fffdf7');}
 }
 function render(){ctx.clearRect(0,0,W,H);ctx.save();if(state.shake>0&&state.mode==='run')ctx.translate(Math.sin(state.frame*13)*state.shake*.33,Math.cos(state.frame*19)*state.shake*.20);
  if(state.mode==='ending'){paintEnd();drawParticles();ctx.restore();return;}
@@ -503,7 +509,7 @@ function show(what){state.mode=what;if(['title','pause','failure','stageSuccess'
  }else if(what==='stageSuccess'){
   cover(`<img class="face" src="${ASSETS.emote_0}" alt="にっこりアンリちゃん"><h1>💕 可愛らしいアンリちゃん</h1><h2>STAGE ${state.stage+1} CLEAR!</h2><p>やったー！ 虫たちを乗り越えたよ！<br>れにーと会えたよ！　虫を ${state.stomps} 匹やっつけた！<br>🪙 このステージで ${state.runCoins} 枚ゲット！</p>${STAGES[state.stage].unlock!==null ? `<p>🎁 あたらしい衣装<br><b>「${OUTFITS[STAGES[state.stage].unlock]}」</b> が解放されたよ♡</p>` : '<p>🌟 もこもこ衣装はコンプリート！<br>まだまだ冒険はつづくよ♡</p>'}<div class="rowbuttons">${b('つぎのステージへ','next')}${b('もういちど見る','replayHug','blue')}${b('きせかえ・ショップ','closet','light')}${b('タイトルへ','title','light')}</div>`);
  }else if(what==='finalSuccess'){
-  cover(`<img class="hug" src="${ASSETS.hug}" alt="アンリちゃんとれにーがハグ"><h1>💗 可愛らしいアンリちゃん</h1><h2>GAME CLEAR! ✨</h2><p>れにーに会えた！ やったね！<br>ここまで会いに来てくれてありがとう。<br>虫を ${state.stomps} 匹やっつけたよ！<br>🪙 このステージで ${state.runCoins} 枚ゲット！</p><p class="tiny">🌟 全10ステージクリア、おめでとう！ もこもこ衣装もコンプリート♡</p><div class="rowbuttons">${b('もういちど見る','replayHug')}${b('もういっかい遊ぶ','start','blue')}${b('きせかえ・ショップ','closet','light')}</div>`);
+  cover(`<img class="hug" src="${ASSETS.hug}" alt="アンリちゃんとれにーがハグ"><h1>💗 可愛らしいアンリちゃん</h1><h2>GAME CLEAR! ✨</h2><p>れにーに会えた！ やったね！<br>ここまで会いに来てくれてありがとう。<br><strong>いつも可愛らしくいてくれてありがとう</strong><br>虫を ${state.stomps} 匹やっつけたよ！<br>🪙 このステージで ${state.runCoins} 枚ゲット！</p><p class="tiny">🌟 全10ステージクリア、おめでとう！ もこもこ衣装もコンプリート♡</p><div class="rowbuttons">${b('もういちど見る','replayHug')}${b('もういっかい遊ぶ','start','blue')}${b('きせかえ・ショップ','closet','light')}</div>`);
  }
 }
 function handleAction(a){if(a==='title')show('title');else if(a==='start')startLevel(0);else if(a==='closet'){state.closetFrom=state.mode;show('closet');}else if(a==='levels')show('levels');else if(a==='retry')startLevel(state.stage);else if(a==='resume'){state.mode='run';veil.classList.add('off');SOUND.start(state.stage);}else if(a==='next')startLevel(Math.min(state.stage+1,STAGES.length-1));else if(a==='replayHug'){state.mode='ending';state.winTime=0;state.particles=[];veil.classList.add('off');SOUND.fx('clear');}else if(a==='backFromCloset'){const back=state.closetFrom;if(back==='stageSuccess'||back==='finalSuccess'||back==='levels'||back==='title')show(back);else if(back==='pause')show('pause');else if(back==='run'){state.mode='run';veil.classList.add('off');SOUND.start(state.stage);}else show('title');}}
